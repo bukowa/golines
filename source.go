@@ -13,20 +13,26 @@ type Source struct {
 	bytes []byte
 }
 
+func (s *Source) SetBytes(b []byte) {
+	s.bytes = b
+}
+
+func (s *Source) SetString(v string) {
+	s.bytes = []byte(v)
+}
+
 func (s *Source) Parse() (err error) {
-	for k, f := range s.Parser.PrefixMap() {
-		if strings.HasPrefix(s.Source, k) {
-			s.bytes, err = f(s.Source)
-			break
-		}
-	}
-	return err
+	return s.ParseSource(s.Source)
 }
 
 func (s *Source) ParseSource(source string) (err error) {
-	for k, f := range s.Parser.PrefixMap() {
-		if strings.HasPrefix(source, k) {
-			s.bytes, err = f(k)
+	var b []byte
+	for key, action := range s.Parser.PrefixMap() {
+		if strings.HasPrefix(source, key) {
+			b, err = action(source)
+			if err == nil {
+				s.SetBytes(b)
+			}
 			break
 		}
 	}
@@ -34,14 +40,14 @@ func (s *Source) ParseSource(source string) (err error) {
 }
 
 func (s *Source) ForLine(x func(int, []byte) error) (err error) {
-	scanner := bufio.NewScanner(
-		bytes.NewReader(s.bytes))
+	reader := bytes.NewReader(s.Bytes())
+	scanner := bufio.NewScanner(reader)
 
 	var pos = 0
 	for scanner.Scan() {
 		err = x(pos, scanner.Bytes())
 		if err != nil {
-			return err
+			break
 		}
 		pos += 1
 	}
