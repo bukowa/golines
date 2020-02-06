@@ -68,7 +68,15 @@ func (s *Source) String() string {
 	return string(s.bytes)
 }
 
-func (s *Source) ByteLines(pre, suf []byte) (data [][]byte, err error) {
+func (s *Source) ByteLines()(data [][]byte, err error) {
+	err = s.ForLine(func(i int, l []byte) error {
+		data = append(data, l)
+		return nil
+	})
+	return data, err
+}
+
+func (s *Source) ByteLinesPreSuf(pre, suf []byte) (data [][]byte, err error) {
 	err = s.ForLine(func(i int, l []byte) error {
 		data = append(data, bytes.Join([][]byte{pre, l, suf}, nil))
 		return nil
@@ -76,7 +84,15 @@ func (s *Source) ByteLines(pre, suf []byte) (data [][]byte, err error) {
 	return data, err
 }
 
-func (s *Source) StringLines(pre, suf string) (data []string, err error) {
+func (s *Source) StringLines() (data []string, err error) {
+	err = s.ForLine(func(i int, l []byte) error {
+		data = append(data, string(l))
+		return nil
+	})
+	return data, err
+}
+
+func (s *Source) StringLinesPreSuf(pre, suf string) (data []string, err error) {
 	err = s.ForLine(func(i int, l []byte) error {
 		data = append(data, pre+string(l)+suf)
 		return nil
