@@ -140,3 +140,23 @@ func TestSource_ParseHttp(t *testing.T) {
 		t.Error()
 	}
 }
+
+func TestSource_Write(t *testing.T) {
+	var b = []byte("1\n2\n3")
+	s := NewSource()
+	s.SetBytes(b)
+	_, err := s.Write([]byte("4"))
+	if err != nil {
+		panic(err)
+	}
+	data, err := s.StringLines()
+	if err != nil {
+		panic(err)
+	}
+	if len(data) != 4 {
+		t.Error(data)
+	}
+	if data[3] != "4" {
+		t.Error(data[3])
+	}
+}

@@ -13,10 +13,31 @@ type Source struct {
 	bytes  []byte
 }
 
+func (s *Source) Read(b []byte)(n int, err error) {
+	rd := bytes.NewReader(s.bytes)
+	return rd.Read(b)
+}
+
+func (s *Source) Write(b []byte) (n int, err error){
+	s.SetBytes(bytes.Join([][]byte{s.bytes, b}, []byte("\n")))
+	return len(b), nil
+}
+
 func NewSource() *Source {
 	return &Source{
 		Parser: &BasicParser{},
 	}
+}
+
+func NewSourceFrom(source string) *Source {
+	return &Source{
+		Parser: &BasicParser{},
+		Source: source,
+	}
+}
+
+func (s *Source) SetSource(source string) {
+	s.Source = source
 }
 
 func (s *Source) SetBytes(b []byte) {
@@ -68,7 +89,7 @@ func (s *Source) String() string {
 	return string(s.bytes)
 }
 
-func (s *Source) ByteLines()(data [][]byte, err error) {
+func (s *Source) ByteLines() (data [][]byte, err error) {
 	err = s.ForLine(func(i int, l []byte) error {
 		data = append(data, l)
 		return nil
