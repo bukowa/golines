@@ -10,7 +10,7 @@ import (
 
 func TestSourceBytesStringsLines(t *testing.T) {
 	s := &Source{
-		bytes:  []byte("1\n2\n3"),
+		bytes: []byte("1\n2\n3"),
 	}
 	if !reflect.DeepEqual(s.Bytes(), []byte("1\n2\n3")) {
 		t.Error()
@@ -44,10 +44,12 @@ func TestSource_ParseFile(t *testing.T) {
 
 	s := &Source{
 		Parser: &BasicParser{},
-		Source: "file://"+fileName,
+		Source: "file://" + fileName,
 	}
 	err := s.Parse()
-	if err != nil {panic(err)}
+	if err != nil {
+		panic(err)
+	}
 
 	// duplicate
 	if !reflect.DeepEqual(s.Bytes(), []byte("1\n2\n3")) {
@@ -71,7 +73,7 @@ func TestSource_ParseFile(t *testing.T) {
 }
 
 // http://
-func TestSource_ParseHttp(t *testing.T){
+func TestSource_ParseHttp(t *testing.T) {
 	var b = []byte("1\n2\n3")
 	var ts = httptest.NewServer(http.FileServer(http.Dir(".")))
 	defer ts.Close()
@@ -85,7 +87,9 @@ func TestSource_ParseHttp(t *testing.T){
 		Source: fmt.Sprintf("%v/%v", ts.URL, fileName),
 	}
 	err := s.Parse()
-	if err != nil {panic(err)}
+	if err != nil {
+		panic(err)
+	}
 	if !reflect.DeepEqual(s.bytes, b) {
 		t.Errorf("%v not equal %v", string(s.bytes), string(b))
 	}

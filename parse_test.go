@@ -30,15 +30,19 @@ func TestBasicParser_PrefixMap(t *testing.T) {
 	p := &BasicParser{}
 	for k, f := range p.PrefixMap() {
 		if k == "file://" {
-			data, err := f("file://"+s)
-			if err != nil {panic(err)}
+			data, err := f("file://" + s)
+			if err != nil {
+				panic(err)
+			}
 			if !reflect.DeepEqual(data, b) {
 				t.Errorf("%v not equal %v", data, b)
 			}
 		}
 		if k == "http://" {
 			data, err := f(fmt.Sprintf("%v/%v", ts.URL, s))
-			if err != nil {panic(err)}
+			if err != nil {
+				panic(err)
+			}
 			if !reflect.DeepEqual(data, b) {
 				t.Error(b)
 			}

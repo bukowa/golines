@@ -10,7 +10,13 @@ import (
 type Source struct {
 	Parser Parser
 	Source string
-	bytes []byte
+	bytes  []byte
+}
+
+func NewSource() *Source {
+	return &Source{
+		Parser: &BasicParser{},
+	}
 }
 
 func (s *Source) SetBytes(b []byte) {
@@ -72,7 +78,7 @@ func (s *Source) ByteLines(pre, suf []byte) (data [][]byte, err error) {
 
 func (s *Source) StringLines(pre, suf string) (data []string, err error) {
 	err = s.ForLine(func(i int, l []byte) error {
-		data = append(data, pre + string(l) + suf)
+		data = append(data, pre+string(l)+suf)
 		return nil
 	})
 	return data, err

@@ -14,13 +14,13 @@ type Parser interface {
 }
 
 type BasicParser struct {
-	Client *http.Client
+	Client  *http.Client
 	Timeout time.Duration
 }
 
 func (p *BasicParser) PrefixMap() map[string]func(string) ([]byte, error) {
 	return map[string]func(string) ([]byte, error){
-		"http://": p.FromUrl,
+		"http://":  p.FromUrl,
 		"https://": p.FromUrl,
 		"file://": func(s string) (bytes []byte, e error) {
 			return p.FromFile(strings.TrimPrefix(s, "file://"))
@@ -41,7 +41,7 @@ func (p *BasicParser) FromUrl(url string) ([]byte, error) {
 
 	if client == nil {
 		client = &http.Client{
-			Timeout:p.Timeout,
+			Timeout: p.Timeout,
 		}
 	}
 	resp, err := client.Get(url)
