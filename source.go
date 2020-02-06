@@ -13,6 +13,10 @@ type Source struct {
 	bytes  []byte
 }
 
+func (s *Source) Close() error {
+	return nil
+}
+
 func (s *Source) Read(b []byte)(n int, err error) {
 	rd := bytes.NewReader(s.bytes)
 	return rd.Read(b)
