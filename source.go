@@ -48,7 +48,7 @@ func (s *Source) ForLine(x func(int, []byte) error) (err error) {
 	return err
 }
 
-func (s *Source) Byte() []byte {
+func (s *Source) Bytes() []byte {
 	return s.bytes
 }
 

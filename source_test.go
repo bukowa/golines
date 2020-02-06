@@ -12,7 +12,7 @@ func TestSourceBytesStringsLines(t *testing.T) {
 	s := &Source{
 		bytes:  []byte("1\n2\n3"),
 	}
-	if !reflect.DeepEqual(s.Byte(), []byte("1\n2\n3")) {
+	if !reflect.DeepEqual(s.Bytes(), []byte("1\n2\n3")) {
 		t.Error()
 	}
 	byteLines, _ := s.ByteLines(nil, nil)
@@ -50,7 +50,7 @@ func TestSource_ParseFile(t *testing.T) {
 	if err != nil {panic(err)}
 
 	// duplicate
-	if !reflect.DeepEqual(s.Byte(), []byte("1\n2\n3")) {
+	if !reflect.DeepEqual(s.Bytes(), []byte("1\n2\n3")) {
 		t.Error()
 	}
 	byteLines, _ := s.ByteLines(nil, nil)
@@ -90,7 +90,7 @@ func TestSource_ParseHttp(t *testing.T){
 		t.Errorf("%v not equal %v", string(s.bytes), string(b))
 	}
 	// duplicate
-	if !reflect.DeepEqual(s.Byte(), []byte("1\n2\n3")) {
+	if !reflect.DeepEqual(s.Bytes(), []byte("1\n2\n3")) {
 		t.Error()
 	}
 	byteLines, _ := s.ByteLines(nil, nil)
