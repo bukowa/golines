@@ -12,14 +12,14 @@ func TestSourceBytesStringsLines(t *testing.T) {
 	if !reflect.DeepEqual(s.Byte(), []byte("1\n2\n3")) {
 		t.Error()
 	}
-	byteLines, _ := s.ByteLines()
+	byteLines, _ := s.ByteLines(nil, nil)
 	if !reflect.DeepEqual(byteLines, [][]byte{[]byte("1"), []byte("2"), []byte("3")}) {
 		t.Error()
 	}
 	if s.String() != "1\n2\n3" {
 		t.Error()
 	}
-	stringLines, _ := s.StringLines()
+	stringLines, _ := s.StringLines("", "")
 	if !reflect.DeepEqual(stringLines, []string{"1", "2", "3"}) {
 		t.Error()
 	}

@@ -31,17 +31,17 @@ func (s *Source) String() string {
 	return string(s.bytes)
 }
 
-func (s *Source) ByteLines() (data [][]byte, err error) {
+func (s *Source) ByteLines(pre, suf []byte) (data [][]byte, err error) {
 	err = s.ForLine(func(l []byte) error {
-		data = append(data, l)
+		data = append(data, bytes.Join([][]byte{pre, l, suf}, nil))
 		return nil
 	})
 	return data, err
 }
 
-func (s *Source) StringLines() (data []string, err error) {
+func (s *Source) StringLines(pre, suf string) (data []string, err error) {
 	err = s.ForLine(func(l []byte) error {
-		data = append(data, string(l))
+		data = append(data, pre + string(l) + suf)
 		return nil
 	})
 	return data, err
