@@ -33,14 +33,17 @@ func (s *Source) ParseSource(source string) (err error) {
 	return err
 }
 
-func (s *Source) ForLine(x func([]byte) error) (err error) {
+func (s *Source) ForLine(x func(int, []byte) error) (err error) {
 	scanner := bufio.NewScanner(
 		bytes.NewReader(s.bytes))
+
+	var pos = 0
 	for scanner.Scan() {
-		err = x(scanner.Bytes())
+		err = x(pos, scanner.Bytes())
 		if err != nil {
 			return err
 		}
+		pos += 1
 	}
 	return err
 }
@@ -54,7 +57,7 @@ func (s *Source) String() string {
 }
 
 func (s *Source) ByteLines(pre, suf []byte) (data [][]byte, err error) {
-	err = s.ForLine(func(l []byte) error {
+	err = s.ForLine(func(i int, l []byte) error {
 		data = append(data, bytes.Join([][]byte{pre, l, suf}, nil))
 		return nil
 	})
@@ -62,7 +65,7 @@ func (s *Source) ByteLines(pre, suf []byte) (data [][]byte, err error) {
 }
 
 func (s *Source) StringLines(pre, suf string) (data []string, err error) {
-	err = s.ForLine(func(l []byte) error {
+	err = s.ForLine(func(i int, l []byte) error {
 		data = append(data, pre + string(l) + suf)
 		return nil
 	})
@@ -70,7 +73,7 @@ func (s *Source) StringLines(pre, suf string) (data []string, err error) {
 }
 
 func (s *Source) IntLines() (data []int, err error) {
-	err = s.ForLine(func(l []byte) error {
+	err = s.ForLine(func(i int, l []byte) error {
 		i, err := strconv.Atoi(string(l))
 		if err != nil {
 			return err
