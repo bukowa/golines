@@ -4,11 +4,33 @@ import (
 	"bufio"
 	"bytes"
 	"strconv"
+	"strings"
 )
 
 type Source struct {
+	Parser Parser
 	Source string
 	bytes []byte
+}
+
+func (s *Source) Parse() (err error) {
+	for k, f := range s.Parser.PrefixMap() {
+		if strings.HasPrefix(s.Source, k) {
+			s.bytes, err = f(s.Source)
+			break
+		}
+	}
+	return err
+}
+
+func (s *Source) ParseSource(source string) (err error) {
+	for k, f := range s.Parser.PrefixMap() {
+		if strings.HasPrefix(source, k) {
+			s.bytes, err = f(k)
+			break
+		}
+	}
+	return err
 }
 
 func (s *Source) ForLine(x func([]byte) error) (err error) {
@@ -20,7 +42,7 @@ func (s *Source) ForLine(x func([]byte) error) (err error) {
 			return err
 		}
 	}
-	return nil
+	return err
 }
 
 func (s *Source) Byte() []byte {
@@ -54,12 +76,7 @@ func (s *Source) IntLines() (data []int, err error) {
 			return err
 		}
 		data = append(data, i)
-		return nil
+		return err
 	})
 	return data, err
 }
-//for _, b := range s.bytes {
-//data = append(data, string(b))
-//}
-//return data
-//func (s *Source) BytesLines() []
