@@ -3,124 +3,47 @@ package golines
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"strconv"
 	"strings"
 )
 
 type Source struct {
+	bytes.Buffer
 	Parser Parser
 	Source string
-	bytes  []byte
 }
 
-// there must be a better way
-func (s *Source) Close() error {
-	return nil
-}
-
-func (s *Source) Read(b []byte) (n int, err error) {
-	rd := bytes.NewReader(s.bytes)
-	return rd.Read(b)
-}
-
-// appends b to s.bytes with '\n'
-// there must be a better way
-func (s *Source) Write(b []byte) (n int, err error) {
-	s.SetBytes(bytes.Join([][]byte{s.bytes, b}, []byte("\n")))
-	return len(b), nil
-}
-
-func (s *Source) Add(x interface{}) (err error){
-	if t, ok := x.(string); ok {
-		_, err = s.Write([]byte(t))
-		return
-	}
+// Add wraps `bytes.Buffer.Write` handling
+// `string`, `[]byte`, `[][]byte`, `[]string`, `*Source`
+// unless unhandled `x` is passed, error is always `nil`
+// while passing slice, `i` will be incremented by each `Write`
+func (s *Source) Add(x interface{}) (i int, err error) {
 	if t, ok := x.([]byte); ok {
-		_, err = s.Write(t)
-		return
+		return s.Write(t)
+	}
+	if t, ok := x.(string); ok {
+		return s.WriteString(t)
+	}
+	if t, ok := x.(*Source); ok {
+		return s.Write(t.Bytes())
 	}
 	if t, ok := x.([][]byte); ok {
 		for _, l := range t {
-			_, err = s.Write(l)
-			if err != nil {
-				return err
-			}
+			ii, _ := s.Write(l)
+			i += ii
 		}
 		return
 	}
 	if t, ok := x.([]string); ok {
 		for _, l := range t {
-			_, err = s.Write([]byte(l))
-			if err != nil {
-				return err
-			}
+			ii, _ := s.WriteString(l)
+			i += ii
 		}
 		return
 	}
-	if t, ok := x.(Source); ok {
-		err = t.ForLine(func(i int, l []byte) error {
-			_, err = s.Write(l)
-			return err
-		})
-		return
-	}
-	return err
-}
-
-func NewSource(v interface{}) (s *Source, err error) {
-	s = &Source{}
-	if t, ok := v.(string); ok {
-		s.SetString(t)
-	}
-	if t, ok := v.([]byte); ok {
-		s.SetBytes(t)
-	}
-	if t, ok := v.([][]byte); ok {
-		for _, l := range t {
-			_, err = s.Write(l)
-			if err != nil {
-				return s, err
-			}
-		}
-	}
-	if t, ok := v.([]string); ok {
-		for _, l := range t {
-			_, err = s.Write([]byte(l))
-			if err != nil {
-				return s, err
-			}
-		}
-	}
-	if t, ok := v.(Source); ok {
-		err = t.ForLine(func(i int, l []byte) error {
-			_, err = s.Write(l)
-			return err
-		})
-	}
-	return s, nil
-}
-func NewSourceBytes(b []byte) *Source {
-	return &Source{
-		bytes: b,
-	}
-}
-
-func NewSourceString(s string) *Source {
-	return &Source{
-		bytes: []byte(s),
-	}
-}
-
-func (s *Source) SetSource(source string) {
-	s.Source = source
-}
-
-func (s *Source) SetBytes(b []byte) {
-	s.bytes = b
-}
-
-func (s *Source) SetString(v string) {
-	s.bytes = []byte(v)
+	// TODO
+	return i, errors.New("type not handled")
 }
 
 func (s *Source) Parse() (err error) {
@@ -156,7 +79,7 @@ func (s *Source) CountStringMapLineN(in string) map[string]int {
 	return d
 }
 
-// map of count => [lines...] ; keys are unordered
+// map of count => [lines...]
 func (s *Source) CountStringMapNLines(in string) map[int][]string {
 	var d = make(map[int][]string)
 	for _, l := range s.StringLines() {
@@ -166,7 +89,7 @@ func (s *Source) CountStringMapNLines(in string) map[int][]string {
 	return d
 }
 
-// map of count => [lines...] ; keys are unordered
+// map of count => [lines...]
 func (s *Source) CountBytesMapNLines(in []byte) map[int][][]byte {
 	var d = make(map[int][][]byte)
 	for _, l := range s.ByteLines() {
@@ -177,17 +100,22 @@ func (s *Source) CountBytesMapNLines(in []byte) map[int][][]byte {
 }
 
 func (s *Source) ParseSource(source string) (err error) {
+	if s.Source == "" {
+		// TODO
+		return errors.New("source is empty")
+	}
 	var b []byte
 	for key, action := range s.Parser.PrefixMap() {
 		if strings.HasPrefix(source, key) {
 			b, err = action(source)
 			if err == nil {
-				s.SetBytes(b)
+				s.Write(b)
 			}
-			break
+			return
 		}
 	}
-	return err
+	// TODO
+	return errors.New("prefix is not handled")
 }
 
 func (s *Source) ForLine(x func(i int, l []byte) error) (err error) {
@@ -203,14 +131,6 @@ func (s *Source) ForLine(x func(i int, l []byte) error) (err error) {
 		pos += 1
 	}
 	return err
-}
-
-func (s *Source) Bytes() []byte {
-	return s.bytes
-}
-
-func (s *Source) String() string {
-	return string(s.bytes)
 }
 
 func (s *Source) ByteLines() (data [][]byte) {
