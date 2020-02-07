@@ -14,13 +14,13 @@ var checkDeepEqual = func(t *testing.T, x, desired interface{}) {
 	}
 }
 
-func TestSource_Add(t *testing.T) {
+func TestLines_Add(t *testing.T) {
 	var b = []byte("1\n2\n3")
 	var desired = "1\n2\n3\n4\n5\n6454\n7\n467\n3\n5\n3\n5\n9\n7\n4\n2\n0"
-	s := &Source{}
+	s := &Lines{}
 	s.Write(b)
 
-	ss := &Source{}
+	ss := &Lines{}
 	ss.WriteString("\n4\n5\n6")
 
 	if ss.String() != "\n4\n5\n6" {
@@ -46,10 +46,10 @@ func TestSource_Add(t *testing.T) {
 	checkDeepEqual(t, s.String(), desired)
 }
 
-func TestSource_CountBytes(t *testing.T) {
+func TestLines_CountBytes(t *testing.T) {
 	var b = []byte("1\n2\n3")
 	var in = []byte("123456")
-	s := &Source{}
+	s := &Lines{}
 	s.Write(b)
 	c := s.CountBytes(in)
 	if c != 3 {
@@ -62,10 +62,10 @@ func TestSource_CountBytes(t *testing.T) {
 	}
 }
 
-func TestSource_CountString(t *testing.T) {
+func TestLines_CountString(t *testing.T) {
 	var str = "1\n2\n3"
 	var in = "123456"
-	s := &Source{}
+	s := &Lines{}
 	s.WriteString(str)
 	c := s.CountString(in)
 	if c != 3 {
@@ -78,12 +78,12 @@ func TestSource_CountString(t *testing.T) {
 	}
 }
 
-func TestSource_CountStringMapLineN(t *testing.T) {
+func TestLines_CountStringMapLineN(t *testing.T) {
 	var str = "1\n2\n3"
 	var in = "112223334"
 	var desired = map[string]int{"1": 2, "2": 3, "3": 3}
 
-	s := &Source{}
+	s := &Lines{}
 	s.WriteString(str)
 	m := s.CountStringMapLineN(in)
 
@@ -94,7 +94,7 @@ func TestSource_CountStringMapLineN(t *testing.T) {
 
 // this may fail, because order is not guaranteed
 // we should sort the keys in this test
-func TestSource_CountStringMapNLines(t *testing.T) {
+func TestLines_CountStringMapNLines(t *testing.T) {
 	var str = "1\n2\n3\n4\n5\n6"
 	var in = "112223334"
 	var desired = map[int][]string{
@@ -103,13 +103,13 @@ func TestSource_CountStringMapNLines(t *testing.T) {
 		3: {"2", "3"},
 		1: {"4"},
 	}
-	s := &Source{}
+	s := &Lines{}
 	s.WriteString(str)
 	m := s.CountStringMapNLines(in)
 	checkDeepEqual(t, m, desired)
 }
 
-func TestSource_CountBytesMapNLines(t *testing.T) {
+func TestLines_CountBytesMapNLines(t *testing.T) {
 	var b = []byte("1\n2\n3\n4\n5\n6")
 	var in = []byte("112223334")
 	var desired = map[int][][]byte{
@@ -118,15 +118,15 @@ func TestSource_CountBytesMapNLines(t *testing.T) {
 		3: {[]byte("2"), []byte("3")},
 		1: {[]byte("4")},
 	}
-	s := &Source{}
+	s := &Lines{}
 	s.Write(b)
 	m := s.CountBytesMapNLines(in)
 	checkDeepEqual(t, m, desired)
 }
 
-func TestSourceBytesStringsLines(t *testing.T) {
+func TestLinesBytesStringsLines(t *testing.T) {
 	var b = []byte("1\n2\n3")
-	s := &Source{}
+	s := &Lines{}
 	s.Write(b)
 	if !reflect.DeepEqual(s.Bytes(), []byte("1\n2\n3")) {
 		t.Error()
@@ -146,7 +146,7 @@ func TestSourceBytesStringsLines(t *testing.T) {
 	}
 }
 
-func TestSource_ParseFile(t *testing.T) {
+func TestLines_ParseFile(t *testing.T) {
 	var b = []byte("1\n2\n3")
 	var ts = httptest.NewServer(http.FileServer(http.Dir(".")))
 	defer ts.Close()
@@ -155,7 +155,7 @@ func TestSource_ParseFile(t *testing.T) {
 	defer file.Close()
 	file.Write(b)
 
-	s := &Source{
+	s := &Lines{
 		Parser: &BasicParser{},
 		Source: "file://" + fileName,
 	}
@@ -184,7 +184,7 @@ func TestSource_ParseFile(t *testing.T) {
 }
 
 // http://
-func TestSource_ParseHttp(t *testing.T) {
+func TestLines_ParseHttp(t *testing.T) {
 	var b = []byte("1\n2\n3")
 	var ts = httptest.NewServer(http.FileServer(http.Dir(".")))
 	defer ts.Close()
@@ -193,7 +193,7 @@ func TestSource_ParseHttp(t *testing.T) {
 	defer file.Close()
 	file.Write(b)
 
-	s := &Source{
+	s := &Lines{
 		Parser: &BasicParser{},
 		Source: fmt.Sprintf("%v/%v", ts.URL, fileName),
 	}
