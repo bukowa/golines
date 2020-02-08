@@ -48,7 +48,7 @@ func TestLines_Add(t *testing.T) {
 
 func TestLines_CountBytes(t *testing.T) {
 	var b = []byte("1\n2\n3")
-	var in = []byte("123456")
+	var in = []byte("1askljhfipouiouj23dsfgfdg45asdasd6asd")
 	s := &Lines{}
 	s.Write(b)
 	c := s.CountBytes(in)
@@ -64,7 +64,7 @@ func TestLines_CountBytes(t *testing.T) {
 
 func TestLines_CountString(t *testing.T) {
 	var str = "1\n2\n3"
-	var in = "123456"
+	var in = "123dsfdsf4sdf5sdfsdf6sdfsdf"
 	s := &Lines{}
 	s.WriteString(str)
 	c := s.CountString(in)
@@ -80,7 +80,7 @@ func TestLines_CountString(t *testing.T) {
 
 func TestLines_CountStringMapLineN(t *testing.T) {
 	var str = "1\n2\n3"
-	var in = "112223334"
+	var in = "1sdfsdf12sdfsdf223sdfsdf3dsfsdf34"
 	var desired = map[string]int{"1": 2, "2": 3, "3": 3}
 
 	s := &Lines{}
@@ -96,7 +96,7 @@ func TestLines_CountStringMapLineN(t *testing.T) {
 // we should sort the keys in this test
 func TestLines_CountStringMapNLines(t *testing.T) {
 	var str = "1\n2\n3\n4\n5\n6"
-	var in = "112223334"
+	var in = "11asd222asd3asd3asd34"
 	var desired = map[int][]string{
 		0: {"5", "6"},
 		2: {"1"},
@@ -111,7 +111,7 @@ func TestLines_CountStringMapNLines(t *testing.T) {
 
 func TestLines_CountBytesMapNLines(t *testing.T) {
 	var b = []byte("1\n2\n3\n4\n5\n6")
-	var in = []byte("112223334")
+	var in = []byte("112asd2asd233asd34")
 	var desired = map[int][][]byte{
 		0: {[]byte("5"), []byte("6")},
 		2: {[]byte("1")},

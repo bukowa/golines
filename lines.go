@@ -53,7 +53,7 @@ func (s *Lines) Parse() (err error) {
 // how many lines are in bytes?
 func (s *Lines) CountBytes(in []byte) (c int) {
 	for _, v := range s.ByteLines() {
-		if bytes.ContainsAny(v, string(in)) {
+		if bytes.Contains(in, v) {
 			c += 1
 		}
 	}
@@ -63,7 +63,7 @@ func (s *Lines) CountBytes(in []byte) (c int) {
 // how many lines are in string?
 func (s *Lines) CountString(in string) (c int) {
 	for _, v := range s.StringLines() {
-		if strings.ContainsAny(in, v) {
+		if strings.Contains(in, v) {
 			c += 1
 		}
 	}
