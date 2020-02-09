@@ -8,10 +8,58 @@ import (
 	"testing"
 )
 
+var TestData = []byte(`
+<HTML>
+<TITLE>my website</TITLE>
+<H1>This is a Header</H1>
+<H2>This is a Medium Header</H2>
+<body>
+support@example.com
+<P> This is a new paragraph!
+<P><B>This is a new paragraph!</B>
+<BR><B><I>This is a new sentence without a paragraph break, in bold italics.</I></B>
+</BODY>
+</HTML> 
+`)
+var TestBytes = []byte(`<HTML>
+<TITLE>
+@
+This is a new paragraph
+<body>
+nope
+bad`)
+
 var checkDeepEqual = func(t *testing.T, x, desired interface{}) {
 	if !reflect.DeepEqual(x, desired) {
 		t.Errorf("'%v' IS NOT '%v'", x, desired)
 	}
+}
+
+func TestDataTest(t *testing.T) {
+	s := &Lines{}
+	s.Write(TestBytes)
+	fmt.Println(s.CountStringMapLineN(string(TestData)))
+	checkDeepEqual(t, s.CountBytes(TestData), 5)
+	checkDeepEqual(t, s.CountString(string(TestData)), 5)
+	checkDeepEqual(t, s.CountStringMapLineN(string(TestData)), map[string]int{
+		"<HTML>": 1,
+		"<TITLE>": 1,
+		"<body>": 1,
+		"@": 1,
+		"This is a new paragraph": 2,
+		"bad": 0,
+		"nope": 0,
+	})
+	checkDeepEqual(t, s.CountStringMapNLines(string(TestData)), map[int][]string{
+		1: {"<HTML>", "<TITLE>", "@", "<body>"},
+		2: {"This is a new paragraph"},
+		0: {"nope", "bad"},
+	})
+	checkDeepEqual(t, s.CountBytesMapNLines(TestData), map[int][][]byte{
+		1: {[]byte("<HTML>"), []byte("<TITLE>"), []byte("@"), []byte("<body>")},
+		2: {[]byte("This is a new paragraph")},
+		0: {[]byte("nope"), []byte("bad")},
+	})
 }
 
 func TestLines_Add(t *testing.T) {
