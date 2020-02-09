@@ -38,17 +38,16 @@ var checkDeepEqual = func(t *testing.T, x, desired interface{}) {
 func TestDataTest(t *testing.T) {
 	s := &Lines{}
 	s.Write(TestBytes)
-	fmt.Println(s.CountStringMapLineN(string(TestData)))
 	checkDeepEqual(t, s.CountBytes(TestData), 5)
 	checkDeepEqual(t, s.CountString(string(TestData)), 5)
 	checkDeepEqual(t, s.CountStringMapLineN(string(TestData)), map[string]int{
-		"<HTML>": 1,
-		"<TITLE>": 1,
-		"<body>": 1,
-		"@": 1,
+		"<HTML>":                  1,
+		"<TITLE>":                 1,
+		"<body>":                  1,
+		"@":                       1,
 		"This is a new paragraph": 2,
-		"bad": 0,
-		"nope": 0,
+		"bad":                     0,
+		"nope":                    0,
 	})
 	checkDeepEqual(t, s.CountStringMapNLines(string(TestData)), map[int][]string{
 		1: {"<HTML>", "<TITLE>", "@", "<body>"},
