@@ -1,14 +1,19 @@
 package golines
 
 import (
-	"fmt"
-	"net/http"
-	"net/http/httptest"
 	"reflect"
 	"testing"
 )
 
-var TestData = []byte(`
+var checkDeepEqual = func(t *testing.T, x, desired interface{}) {
+	if !reflect.DeepEqual(x, desired) {
+		t.Errorf("'%v' IS NOT '%v'", x, desired)
+	}
+}
+
+func TestDataTest(t *testing.T) {
+
+	var testData = []byte(`
 <HTML>
 <TITLE>my website</TITLE>
 <H1>This is a Header</H1>
@@ -21,7 +26,7 @@ support@example.com
 </BODY>
 </HTML> 
 `)
-var TestBytes = []byte(`<HTML>
+	var testBytes = []byte(`<HTML>
 <TITLE>
 @
 This is a new paragraph
@@ -29,18 +34,11 @@ This is a new paragraph
 nope
 bad`)
 
-var checkDeepEqual = func(t *testing.T, x, desired interface{}) {
-	if !reflect.DeepEqual(x, desired) {
-		t.Errorf("'%v' IS NOT '%v'", x, desired)
-	}
-}
-
-func TestDataTest(t *testing.T) {
 	s := &Lines{}
-	s.Write(TestBytes)
-	checkDeepEqual(t, s.CountBytes(TestData), 5)
-	checkDeepEqual(t, s.CountString(string(TestData)), 5)
-	checkDeepEqual(t, s.CountStringMapLineN(string(TestData)), map[string]int{
+	s.Write(testBytes)
+	checkDeepEqual(t, s.CountBytes(testData), 5)
+	checkDeepEqual(t, s.CountString(string(testData)), 5)
+	checkDeepEqual(t, s.CountStringMapLineN(string(testData)), map[string]int{
 		"<HTML>":                  1,
 		"<TITLE>":                 1,
 		"<body>":                  1,
@@ -49,12 +47,12 @@ func TestDataTest(t *testing.T) {
 		"bad":                     0,
 		"nope":                    0,
 	})
-	checkDeepEqual(t, s.CountStringMapNLines(string(TestData)), map[int][]string{
+	checkDeepEqual(t, s.CountStringMapNLines(string(testData)), map[int][]string{
 		1: {"<HTML>", "<TITLE>", "@", "<body>"},
 		2: {"This is a new paragraph"},
 		0: {"nope", "bad"},
 	})
-	checkDeepEqual(t, s.CountBytesMapNLines(TestData), map[int][][]byte{
+	checkDeepEqual(t, s.CountBytesMapNLines(testData), map[int][][]byte{
 		1: {[]byte("<HTML>"), []byte("<TITLE>"), []byte("@"), []byte("<body>")},
 		2: {[]byte("This is a new paragraph")},
 		0: {[]byte("nope"), []byte("bad")},
@@ -193,78 +191,9 @@ func TestLinesBytesStringsLines(t *testing.T) {
 	}
 }
 
-func TestLines_ParseFile(t *testing.T) {
-	var b = []byte("1\n2\n3")
-	var ts = httptest.NewServer(http.FileServer(http.Dir(".")))
-	defer ts.Close()
-
-	file, fileName := GetFileTest()
-	defer file.Close()
-	file.Write(b)
-
-	s := &Lines{
-		Parser: &BasicParser{},
-		Source: "file://" + fileName,
-	}
-	err := s.Parse()
-	if err != nil {
-		panic(err)
-	}
-
-	// duplicate
-	if !reflect.DeepEqual(s.Bytes(), []byte("1\n2\n3")) {
-		t.Error()
-	}
-	if !reflect.DeepEqual(s.ByteLines(), [][]byte{[]byte("1"), []byte("2"), []byte("3")}) {
-		t.Error()
-	}
-	if s.String() != "1\n2\n3" {
-		t.Error()
-	}
-	if !reflect.DeepEqual(s.StringLines(), []string{"1", "2", "3"}) {
-		t.Error()
-	}
-	intLines, _ := s.IntLines()
-	if !reflect.DeepEqual(intLines, []int{1, 2, 3}) {
-		t.Error()
-	}
-}
-
-// http://
-func TestLines_ParseHttp(t *testing.T) {
-	var b = []byte("1\n2\n3")
-	var ts = httptest.NewServer(http.FileServer(http.Dir(".")))
-	defer ts.Close()
-
-	file, fileName := GetFileTest()
-	defer file.Close()
-	file.Write(b)
-
-	s := &Lines{
-		Parser: &BasicParser{},
-		Source: fmt.Sprintf("%v/%v", ts.URL, fileName),
-	}
-	err := s.Parse()
-	if err != nil {
-		panic(err)
-	}
-	// duplicate
-	if !reflect.DeepEqual(s.Bytes(), []byte("1\n2\n3")) {
-		t.Error()
-	}
-	if !reflect.DeepEqual(s.ByteLines(), [][]byte{[]byte("1"), []byte("2"), []byte("3")}) {
-		t.Error()
-	}
-	if s.String() != "1\n2\n3" {
-		t.Error()
-	}
-	if !reflect.DeepEqual(s.StringLines(), []string{"1", "2", "3"}) {
-		t.Error()
-	}
-	intLines, _ := s.IntLines()
-	if !reflect.DeepEqual(intLines, []int{1, 2, 3}) {
-		t.Error()
-	}
+func TestLines_StringAndBytesLinesPreSuf(t *testing.T) {
+	s := &Lines{}
+	s.WriteString("1\n2\n3")
 
 	if !reflect.DeepEqual(s.ByteLinesPreSuf([]byte("a"), []byte("b")), [][]byte{[]byte("a1b"), []byte("a2b"), []byte("a3b")}) {
 		t.Error()
@@ -272,14 +201,12 @@ func TestLines_ParseHttp(t *testing.T) {
 	if !reflect.DeepEqual(s.StringLinesPreSuf("a", "b"), []string{"a1b", "a2b", "a3b"}) {
 		t.Error()
 	}
-
 	if !reflect.DeepEqual(s.ByteLinesPreSuf([]byte("a"), nil), [][]byte{[]byte("a1"), []byte("a2"), []byte("a3")}) {
 		t.Error()
 	}
 	if !reflect.DeepEqual(s.StringLinesPreSuf("a", ""), []string{"a1", "a2", "a3"}) {
 		t.Error()
 	}
-
 	if !reflect.DeepEqual(s.ByteLinesPreSuf(nil, []byte("b")), [][]byte{[]byte("1b"), []byte("2b"), []byte("3b")}) {
 		t.Error()
 	}
