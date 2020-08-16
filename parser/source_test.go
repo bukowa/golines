@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func testSource(t *testing.T, b []byte){
+func testSource(t *testing.T, b []byte) {
 	d := strings.Split(string(b), "\n")
 	if d[0] != "package parser" {
 		t.Error()
@@ -66,5 +66,12 @@ func TestParseSourceErr(t *testing.T) {
 	}
 	if b != nil {
 		t.Error(b)
+	}
+}
+
+func TestParseSourceBadUrl(t *testing.T) {
+	_, err := ParseSource("http://exxxxxxxxxxxxxxxxxxxxample.sssssssssssssssssscom")
+	if reflect.DeepEqual(err, ErrPrefixNotHandled) {
+		t.Error()
 	}
 }

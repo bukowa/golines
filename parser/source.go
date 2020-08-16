@@ -3,6 +3,7 @@ package parser
 import (
 	"errors"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -19,31 +20,41 @@ var SourcePrefixMap = map[string]func(string) ([]byte, error){
 }
 
 func ParseSource(source string) (b []byte, err error) {
+	var match bool
+
 	for key, action := range SourcePrefixMap {
+		log.Print(source, " ", key)
 		if strings.HasPrefix(source, key) {
+			match = true
 			b, err = action(source)
-			if err == nil {
+			if err != nil {
 				return
 			}
 		}
 	}
-	return nil, ErrPrefixNotHandled
+	if !match {
+		err = ErrPrefixNotHandled
+	}
+	return
 }
 
-func ParseFromFile(path string) ([]byte, error) {
-	f, err := os.Open(path)
+func ParseFromFile(path string) (b []byte, err error) {
+	var f *os.File
+	f, err = os.Open(path)
 	if err != nil {
-		return nil, err
+		return
 	}
 	return ioutil.ReadAll(f)
 }
 
-func ParseFromUrl(url string) ([]byte, error) {
-	c := &http.Client{}
-	resp, err := c.Get(url)
+func ParseFromUrl(url string) (b []byte, err error) {
+	var r *http.Response
+	var c = &http.Client{}
+
+	r, err = c.Get(url)
 	if err != nil {
-		return nil, err
+		return
 	}
-	defer resp.Body.Close()
-	return ioutil.ReadAll(resp.Body)
+	defer r.Body.Close()
+	return ioutil.ReadAll(r.Body)
 }
