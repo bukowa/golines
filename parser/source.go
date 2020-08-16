@@ -3,7 +3,6 @@ package parser
 import (
 	"errors"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -23,7 +22,6 @@ func ParseSource(source string) (b []byte, err error) {
 	var match bool
 
 	for key, action := range SourcePrefixMap {
-		log.Print(source, " ", key)
 		if strings.HasPrefix(source, key) {
 			match = true
 			b, err = action(source)
